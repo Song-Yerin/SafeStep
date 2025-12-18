@@ -289,7 +289,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mapName: "\uBCF4\uB3C4"
-  nextSceneName: Map_demo
+  nextSceneName: Soon_Map_2
   audioSource: {fileID: 1613243303}
   hoverTTS: {fileID: 8300000, guid: 1aa1218e251854c4e864c5abbbb3bde8, type: 3}
   clickTTS: {fileID: 8300000, guid: d16ee3289e6530a46b7df0d3a44d8d7b, type: 3}
@@ -1222,7 +1222,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mapName: "\uC9C0\uD558\uCCA0"
-  nextSceneName: Soon_Map_2
+  nextSceneName: Subway
   audioSource: {fileID: 1613243303}
   hoverTTS: {fileID: 8300000, guid: 6aab817f03d8e914c8d38784dc73691a, type: 3}
   clickTTS: {fileID: 8300000, guid: d16ee3289e6530a46b7df0d3a44d8d7b, type: 3}
