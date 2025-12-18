@@ -91,6 +91,10 @@ public class MapSelectButton : MonoBehaviour, IPointerEnterHandler, IPointerExit
     IEnumerator LoadSceneAfterDelay(float delay)
     {
         yield return new WaitForSeconds(delay);
+
+        int savedVision = PlayerPrefs.GetInt("SelectedVision", 0);
+        Debug.Log($"[MapSelect] 맵 로드: {nextSceneName}, 비전: {savedVision}");
+
         UnityEngine.SceneManagement.SceneManager.LoadScene(nextSceneName);
     }
 }

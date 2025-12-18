@@ -1,100 +1,106 @@
-// VisionEffectManager.cs - ∞¢ ∏  æ¿ø° πËƒ°
-using UnityEngine;
+Ôªøusing UnityEngine;
+using UnityEngine.Rendering;
+using UnityEngine.Rendering.Universal;  // üî¥ URPÏö©
 
 public class VisionEffectManager : MonoBehaviour
 {
-    [Header("Effect Materials")]
-    public Material lowVisionMaterial;
-    public Material tunnelVisionMaterial;
-    public Material completeBlindnessMaterial;
-    public Material peripheralLossMaterial;
+    public Volume postProcessVolume;
+    public int currentVisionType = 0;
 
-    private Camera mainCamera;
-    private VisionType currentVisionType;
+    private Vignette vignette;
+    private DepthOfField depthOfField;
+    private ColorAdjustments colorAdjustments;
+    private Bloom bloom;
 
-    private void Start()
+    void Start()
     {
-        // ∏  æ¿ø° µÈæÓø‘¿ª ∂ß GameManagerø°º≠ º±≈√µ» ≈∏¿‘ ∞°¡Æø¿±‚
-        if (GameManager.Instance != null)
-        {
-            currentVisionType = GameManager.Instance.selectedVisionType;
-            Debug.Log($"Applying vision effect: {currentVisionType}");
-        }
-        else
-        {
-            Debug.LogWarning("GameManager not found! Using default vision type.");
-            currentVisionType = VisionType.LowVision;
-        }
+        if (postProcessVolume == null)
+            postProcessVolume = FindObjectOfType<Volume>();
 
-        FindAndApplyEffect();
-    }
-
-    private void FindAndApplyEffect()
-    {
-        // VR ƒ´∏ﬁ∂Û √£±‚
-        mainCamera = Camera.main;
-
-        if (mainCamera == null)
+        if (postProcessVolume != null && postProcessVolume.profile != null)
         {
-            GameObject xrRig = GameObject.Find("XR Rig") ?? GameObject.Find("XR Origin");
-            if (xrRig != null)
-            {
-                mainCamera = xrRig.GetComponentInChildren<Camera>();
-            }
-        }
-
-        if (mainCamera != null)
-        {
-            ApplyVisionEffect();
-        }
-        else
-        {
-            Debug.LogError("Main Camera not found!");
+            postProcessVolume.profile.TryGet(out vignette);
+            postProcessVolume.profile.TryGet(out depthOfField);
+            postProcessVolume.profile.TryGet(out colorAdjustments);
+            postProcessVolume.profile.TryGet(out bloom);
         }
     }
 
-    private void ApplyVisionEffect()
+    public void SetVisionEffect(int visionType)
     {
-        Material selectedMaterial = null;
+        currentVisionType = visionType;
+        ResetEffects();
 
-        switch (currentVisionType)
+        switch (visionType)
         {
-            case VisionType.LowVision:
-                selectedMaterial = lowVisionMaterial;
+            case 0:
+                ApplyNormalVision();
                 break;
-            case VisionType.TunnelVision:
-                selectedMaterial = tunnelVisionMaterial;
+            case 1:
+                ApplyLowVision();
                 break;
-            case VisionType.CompleteBlindness:
-                selectedMaterial = completeBlindnessMaterial;
+            case 2:
+                ApplyTunnelVision();
                 break;
-            case VisionType.PeripheralVisionLoss:
-                selectedMaterial = peripheralLossMaterial;
+            case 3:
+                ApplyPeripheralVision();
                 break;
         }
 
-        if (selectedMaterial != null)
-        {
-            // VisionEffectRenderer √ﬂ∞° ∂«¥¬ æ˜µ•¿Ã∆Æ
-            VisionEffectRenderer renderer = mainCamera.GetComponent<VisionEffectRenderer>();
-            if (renderer == null)
-            {
-                renderer = mainCamera.gameObject.AddComponent<VisionEffectRenderer>();
-            }
-            renderer.effectMaterial = selectedMaterial;
-
-            Debug.Log($"Vision effect applied: {currentVisionType}");
-        }
-        else
-        {
-            Debug.LogError($"Material for {currentVisionType} is not assigned!");
-        }
+        Debug.Log($"[VisionEffect] {visionType} Ï†ÅÏö©Îê®");
     }
 
-    // ∞≥πﬂ¿⁄ ≈◊Ω∫∆ÆøÎ - ∑±≈∏¿”ø° »ø∞˙ ∫Ø∞Ê
-    public void ChangeVisionEffect(VisionType newType)
+    void ResetEffects()
     {
-        currentVisionType = newType;
-        ApplyVisionEffect();
+        if (vignette != null)
+            vignette.active = false;
+        if (depthOfField != null)
+            depthOfField.active = false;
+        if (bloom != null)
+            bloom.active = false;
+    }
+
+    void ApplyNormalVision()
+    {
+        Debug.Log("[VisionEffect] Ï†ïÏÉÅ ÏãúÎ†•");
+    }
+
+    void ApplyLowVision()
+    {
+        if (bloom != null)
+        {
+            bloom.active = true;
+            bloom.intensity.value = 5f;
+        }
+
+        if (colorAdjustments != null)
+        {
+            colorAdjustments.saturation.value = -30f;
+        }
+
+        Debug.Log("[VisionEffect] Ï†ÄÏãúÎ†•");
+    }
+
+    void ApplyTunnelVision()
+    {
+        if (vignette != null)
+        {
+            vignette.active = true;
+            vignette.intensity.value = 0.6f;
+            vignette.smoothness.value = 0.4f;
+        }
+
+        Debug.Log("[VisionEffect] ÌÑ∞ÎÑê ÏãúÏïº");
+    }
+
+    void ApplyPeripheralVision()
+    {
+        if (depthOfField != null)
+        {
+            depthOfField.active = true;
+            depthOfField.focusDistance.value = 100f;
+        }
+
+        Debug.Log("[VisionEffect] Ï£ºÎ≥Ä ÏãúÏïº");
     }
 }

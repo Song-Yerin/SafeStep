@@ -1,34 +1,37 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using System.Collections;
-using System.Collections.Generic;
-
 public class CarSpawner : MonoBehaviour
 {
-    [Header("Â÷·® ÇÁ¸®ÆÕµé")]
+    [Header("ì°¨ëŸ‰ í”„ë¦¬íŒ¹ë“¤")]
     public GameObject[] carPrefabs;
 
-    [Header("½ºÆù ¼³Á¤")]
-    public SpawnPoint[] spawnPoints;  // Transform[] ´ë½Å SpawnPoint[]
+    [Header("ìŠ¤í° ì„¤ì •")]
+    public SpawnPoint[] spawnPoints;
     public float spawnInterval = 5f;
     public int maxCars = 20;
 
     private int currentCarCount = 0;
+    private int currentSpawnIndex = 0;  // ğŸ”´ ì¶”ê°€
+
+    public static CarSpawner Instance;
+
+    void Awake()
+    {
+        Instance = this;
+    }
 
     void Start()
     {
-        // ¹è¿­ Ã¼Å©
         if (carPrefabs.Length == 0)
         {
-            Debug.LogError("Â÷·® ÇÁ¸®ÆÕÀÌ ¾ø½À´Ï´Ù!");
+            Debug.LogError("ì°¨ëŸ‰ í”„ë¦¬íŒ¹ì´ ì—†ìŠµë‹ˆë‹¤!");
             return;
         }
-
         if (spawnPoints.Length == 0)
         {
-            Debug.LogError("½ºÆù Æ÷ÀÎÆ®°¡ ¾ø½À´Ï´Ù!");
+            Debug.LogError("ìŠ¤í° í¬ì¸íŠ¸ê°€ ì—†ìŠµë‹ˆë‹¤!");
             return;
         }
-
         StartCoroutine(SpawnCars());
     }
 
@@ -38,16 +41,20 @@ public class CarSpawner : MonoBehaviour
         {
             if (currentCarCount < maxCars)
             {
-                // ·£´ı Â÷·® ¼±ÅÃ
                 GameObject randomCar = carPrefabs[Random.Range(0, carPrefabs.Length)];
-
-                // ·£´ı ½ºÆù À§Ä¡
                 SpawnPoint spawn = spawnPoints[Random.Range(0, spawnPoints.Length)];
 
-                // Â÷·® »ı¼º
-                GameObject car = Instantiate(randomCar, spawn.transform.position, spawn.transform.rotation);
+                // ğŸ”´ 0ë²ˆ ì›¨ì´í¬ì¸íŠ¸ ìœ„ì¹˜ì—ì„œ ìŠ¤í°
+                Vector3 spawnPosition = spawn.routeWaypoints.Length > 0
+                    ? spawn.routeWaypoints[0].position
+                    : spawn.transform.position;
 
-                // ¿şÀÌÆ÷ÀÎÆ® ÇÒ´ç!
+                Quaternion spawnRotation = spawn.routeWaypoints.Length > 1
+                    ? Quaternion.LookRotation(spawn.routeWaypoints[1].position - spawn.routeWaypoints[0].position)
+                    : spawn.transform.rotation;
+
+                GameObject car = Instantiate(randomCar, spawnPosition, spawnRotation);
+
                 CarAI carAI = car.GetComponent<CarAI>();
                 if (carAI != null && spawn.routeWaypoints.Length > 0)
                 {
@@ -55,12 +62,16 @@ public class CarSpawner : MonoBehaviour
                 }
                 else
                 {
-                    Debug.LogWarning("CarAI ¶Ç´Â ¿şÀÌÆ÷ÀÎÆ®°¡ ¾ø½À´Ï´Ù!");
+                    Debug.LogWarning("CarAI ë˜ëŠ” ì›¨ì´í¬ì¸íŠ¸ê°€ ì—†ìŠµë‹ˆë‹¤!");
                 }
 
                 currentCarCount++;
             }
             yield return new WaitForSeconds(spawnInterval);
         }
+    }
+    public void OnCarDestroyed()
+    {
+        currentCarCount--;
     }
 }

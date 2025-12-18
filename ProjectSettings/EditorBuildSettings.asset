@@ -17,6 +17,9 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Yerin/MainMenu.unity
     guid: 36ce1d989f2fcb04f94874d32798b9d0
+  - enabled: 1
+    path: Assets/Yerin/Map.unity
+    guid: 4128fb6587d723d46b251f187c4d3e97
   m_configObjects:
     Unity.XR.Oculus.Settings: {fileID: 11400000, guid: d88142fe62c444d449f5064456d5cc18, type: 2}
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}

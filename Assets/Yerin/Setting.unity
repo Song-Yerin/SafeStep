@@ -506,6 +506,51 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 815915055}
   m_CullTransparentMesh: 1
+--- !u!1 &1037310177
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1037310179}
+  - component: {fileID: 1037310178}
+  m_Layer: 0
+  m_Name: VisionSelectManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1037310178
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1037310177}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 936ba5ce7eee66d42af4064d8e12e3a9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mapSelectionSceneName: MainMenu
+--- !u!4 &1037310179
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1037310177}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -81.97826, y: 4.9706554, z: 59.320366}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1112545689
 GameObject:
   m_ObjectHideFlags: 0
@@ -701,7 +746,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1276331863}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1037310178}
+        m_TargetAssemblyTypeName: VisionSelectionManager, Assembly-CSharp
+        m_MethodName: SelectPeripheralVision
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &1356692789
 GameObject:
   m_ObjectHideFlags: 0
@@ -945,7 +1002,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1492447403}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1037310178}
+        m_TargetAssemblyTypeName: VisionSelectionManager, Assembly-CSharp
+        m_MethodName: SelectNormalVision
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &1536081043
 GameObject:
   m_ObjectHideFlags: 0
@@ -1066,55 +1135,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1536081045}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
---- !u!1 &1682237400
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1682237402}
-  - component: {fileID: 1682237401}
-  m_Layer: 0
-  m_Name: SetManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1682237401
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1682237400}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d57ee76bf9275514d8fed15c81d002e5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  lowVisionButton: {fileID: 1536081047}
-  tunnelVisionButton: {fileID: 1717444741}
-  completeBlindnessButton: {fileID: 1492447405}
-  peripheralVisionLossButton: {fileID: 1276331865}
---- !u!4 &1682237402
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1682237400}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 294.429, y: 13.295224, z: -33.344418}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+      m_Calls:
+      - m_Target: {fileID: 1037310178}
+        m_TargetAssemblyTypeName: VisionSelectionManager, Assembly-CSharp
+        m_MethodName: SelectLowVision
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &1717444737
 GameObject:
   m_ObjectHideFlags: 0
@@ -1235,7 +1268,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1717444739}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1037310178}
+        m_TargetAssemblyTypeName: VisionSelectionManager, Assembly-CSharp
+        m_MethodName: SelectTunnelVision
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &1777813221
 GameObject:
   m_ObjectHideFlags: 0
@@ -2120,4 +2165,4 @@ SceneRoots:
   - {fileID: 1971281261}
   - {fileID: 539828929}
   - {fileID: 1832871632}
-  - {fileID: 1682237402}
+  - {fileID: 1037310179}
