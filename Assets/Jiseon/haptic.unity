@@ -65648,6 +65648,10 @@ PrefabInstance:
       value: ElectricScooterProp_black
       objectReference: {fileID: 0}
     - target: {fileID: 8408608322637286167, guid: 50d6ec24441416f478c9c6da39fd915d, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8408608322637286167, guid: 50d6ec24441416f478c9c6da39fd915d, type: 3}
       propertyPath: m_TagString
       value: Obstacle
       objectReference: {fileID: 0}
@@ -189222,6 +189226,79 @@ MonoBehaviour:
   m_LightCookieSize: {x: 1, y: 1}
   m_LightCookieOffset: {x: 0, y: 0}
   m_SoftShadowQuality: 0
+--- !u!1 &1819117278
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1819117280}
+  - component: {fileID: 1819117279}
+  - component: {fileID: 1819117281}
+  m_Layer: 0
+  m_Name: ObstacleArea
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!65 &1819117279
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1819117278}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 13.47, y: 1, z: 4.26}
+  m_Center: {x: 0, y: 0.88, z: 0}
+--- !u!4 &1819117280
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1819117278}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -13.4, y: 0, z: 15.15}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1819117281
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1819117278}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5d78c0a737d6fb9449d6a501fca8e5e4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  spawnArea: {fileID: 1819117279}
+  obstaclePrefab: {fileID: 4399238348627798894, guid: 5fd3964f4aec67945a7b6652637f4e37, type: 3}
+  spawnCount: 3
+  fallenProbability: 0.5
+  fallenAngle: 90
+  minDistance: 1.2
+  maxTries: 20
 --- !u!1 &1819270228 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5383792035519491412, guid: adce9d3aecc806e4291b160d931e27a8, type: 3}
@@ -223898,7 +223975,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d3a4d0ef92ba7404dbbd05a2c71dc0d1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  rightJoystickAction: {fileID: -8198699208435500284, guid: c348712bda248c246b8c49b3db54643f, type: 3}
+  rightJoystickAction: {fileID: 2883175194488637904, guid: 0be0028c24f2a4c14a96b6aa39055933, type: 3}
   virtualCaneRoot: {fileID: 1210439592}
   rotationSpeed: 60
   maxAngle: 30
@@ -225185,3 +225262,4 @@ SceneRoots:
   - {fileID: 596379000}
   - {fileID: 1860699092}
   - {fileID: 1664310429}
+  - {fileID: 1819117280}
