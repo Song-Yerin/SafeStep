@@ -4,60 +4,54 @@ public class StraightWalkDetector : MonoBehaviour
 {
     [Header("필수 연결")]
     public Transform userHMD;   // 플레이어 카메라
-    public Transform endPoint;  // 횡단보도 건너편 도착점 (중앙에 배치 필수!)
+    public Transform endPoint;  // 도착점 (Destination)
+    public Transform crosswalkStartPoint; // 횡단보도 시작점 (안전선 기준용)
 
-    // 횡단보도 객체는 이제 방향 계산용이 아니라, 시작 위치 참조용으로만 씁니다.
-    // (만약 시작점이 유동적이라면 이 변수는 사실상 없어도 됩니다)
-    public Transform crosswalkStartPoint;
+    [Header("오디오 연결 (추가됨)")]
+    public AudioSource audioSource;
+    public AudioClip goLeftClip;  // "왼쪽으로 이동하세요" (오른쪽으로 이탈했을 때)
+    public AudioClip goRightClip; // "오른쪽으로 이동하세요" (왼쪽으로 이탈했을 때)
 
     [Header("감도 설정")]
     public float warningThreshold = 0.5f; // 이탈 허용 범위 (미터)
-
-    [Header("옵션")]
-    // 체크하면: 플레이어가 '출발한 위치'를 기준으로 직선을 그립니다. (평행 이동)
-    // 체크 해제하면: 무조건 '횡단보도 중앙'을 기준으로 직선을 그립니다.
-    public bool useRelativePath = true;
+    public bool useRelativePath = true;   // 출발 위치 기준 여부
 
     // --- 외부 정보 ---
     public bool IsDeviated { get; private set; }
     public float CurrentDeviation { get; private set; }
     public string DirectionFeedback { get; private set; }
 
-    // 내부 계산용 변수
-    private Vector3 pathStartPos;   // 경로의 시작점
-    private Vector3 pathDirection;  // 경로의 방향 (단위 벡터)
+    // 내부 변수
+    private Vector3 pathStartPos;
+    private Vector3 pathDirection;
     private bool isMonitoring = false;
     private float lastLogTime = 0f;
+    private float audioCooldown = 2.5f; // 음성 안내 간격 (너무 자주 울리면 시끄러움)
 
     public void StartSensor()
     {
         // 1. 방향 벡터 계산 (시작점 -> 도착점)
-        // 횡단보도 에셋의 회전값이 이상해도, 도착점만 잘 찍으면 정확한 직선이 나옵니다.
-        // 높이(y) 차이는 무시하고 평면상 방향만 구합니다.
         Vector3 startPos = (crosswalkStartPoint != null) ? crosswalkStartPoint.position : userHMD.position;
         Vector3 endPos = endPoint.position;
 
         Vector3 direction = endPos - startPos;
-        direction.y = 0; // 높이 무시
-        pathDirection = direction.normalized; // 방향 벡터 확정
+        direction.y = 0;
+        pathDirection = direction.normalized;
 
-        // 2. 경로의 기준점(시작점) 설정
+        // 2. 경로의 기준점 설정
         if (useRelativePath)
         {
-            // [사용자 맞춤] 플레이어가 서 있는 바로 그 위치에서 시작하는 직선 생성
             pathStartPos = userHMD.position;
-            pathStartPos.y = 0;
         }
         else
         {
-            // [절대 중앙] 무조건 횡단보도 객체의 위치를 기준으로 직선 생성
             pathStartPos = startPos;
-            pathStartPos.y = 0;
         }
+        pathStartPos.y = 0;
 
         isMonitoring = true;
         IsDeviated = false;
-        Debug.Log($"📡 센서 보정 완료. 방향: {pathDirection}, 기준점: {pathStartPos}");
+        Debug.Log($"📡 센서 작동 시작. 기준: {pathStartPos}");
     }
 
     public void StopSensor()
@@ -70,36 +64,37 @@ public class StraightWalkDetector : MonoBehaviour
     {
         if (!isMonitoring) return;
 
-        // 1. 플레이어 현재 위치 (높이 무시)
+        // 1. 현재 위치 계산
         Vector3 currentUserPos = userHMD.position;
         currentUserPos.y = 0;
 
-        // 2. 벡터 연산으로 이탈 거리 계산 (Cross Product 활용)
-        // 경로 방향 벡터와 플레이어 위치 벡터의 외적(Cross Product)의 Y값은
-        // 직선 거리를 의미하며, 부호(+/-)로 왼쪽/오른쪽을 알 수 있습니다.
-
+        // 2. 이탈 거리 계산 (외적 활용)
         Vector3 vectorToUser = currentUserPos - pathStartPos;
-
-        // 외적 계산: (직선 방향) x (내 위치 벡터)
-        // 결과값의 Y가 양수면 오른쪽, 음수면 왼쪽입니다. (왼손 좌표계 기준)
-        float deviationCheck = Vector3.Cross(pathDirection, vectorToUser).y;
-
-        CurrentDeviation = deviationCheck;
+        CurrentDeviation = Vector3.Cross(pathDirection, vectorToUser).y;
 
         // 3. 판정 로직
         if (Mathf.Abs(CurrentDeviation) > warningThreshold)
         {
             IsDeviated = true;
 
-            if (CurrentDeviation > 0)
+            // 쿨타임 체크 (로그와 음성이 너무 자주 나오지 않게)
+            if (Time.time - lastLogTime > audioCooldown)
             {
-                DirectionFeedback = "Left"; // 오른쪽(+) 이탈 -> 왼쪽 지시
-                LogFeedback("◀️ 왼쪽으로 이동하세요", CurrentDeviation);
-            }
-            else
-            {
-                DirectionFeedback = "Right"; // 왼쪽(-) 이탈 -> 오른쪽 지시
-                LogFeedback("▶️ 오른쪽으로 이동하세요", CurrentDeviation);
+                if (CurrentDeviation > 0)
+                {
+                    // 오른쪽(+)으로 치우침 -> "왼쪽으로 가세요"
+                    DirectionFeedback = "Left";
+                    Debug.Log($"⚠️ 오른쪽으로 이탈! (◀️ 왼쪽으로 이동하세요)");
+                    PlayGuideVoice(goLeftClip);
+                }
+                else
+                {
+                    // 왼쪽(-)으로 치우침 -> "오른쪽으로 가세요"
+                    DirectionFeedback = "Right";
+                    Debug.Log($"⚠️ 왼쪽으로 이탈! (▶️ 오른쪽으로 이동하세요)");
+                    PlayGuideVoice(goRightClip);
+                }
+                lastLogTime = Time.time;
             }
         }
         else
@@ -109,28 +104,26 @@ public class StraightWalkDetector : MonoBehaviour
         }
     }
 
-    void LogFeedback(string msg, float distance)
+    // 음성 재생 함수 (중복 재생 방지 포함)
+    void PlayGuideVoice(AudioClip clip)
     {
-        if (Time.time - lastLogTime > 1.0f)
+        if (audioSource != null && clip != null)
         {
-            Debug.Log($"⚠️ {Mathf.Abs(distance):F2}m 이탈! ({msg})");
-            lastLogTime = Time.time;
+            // 이미 말하고 있으면 끊지 않고 기다릴지, 아니면 덮어쓸지 결정
+            // 여기서는 중요한 경고이므로 즉시 재생 (PlayOneShot)
+            if (!audioSource.isPlaying)
+            {
+                audioSource.PlayOneShot(clip);
+            }
         }
     }
 
-    // [디버깅용] 씬 화면에 가상의 직선 그려주기 (이게 진짜 꿀기능!)
     void OnDrawGizmos()
     {
         if (isMonitoring)
         {
             Gizmos.color = Color.green;
-            // 기준선 그리기
             Gizmos.DrawLine(pathStartPos, pathStartPos + pathDirection * 20f);
-
-            // 플레이어 위치 표시
-            Gizmos.color = Color.red;
-            Vector3 userPosFlat = userHMD.position; userPosFlat.y = 0;
-            Gizmos.DrawSphere(userPosFlat, 0.1f);
         }
     }
 }

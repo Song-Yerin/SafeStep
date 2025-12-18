@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System;
 
 public class IntersectionManager : MonoBehaviour
 {
@@ -18,6 +19,8 @@ public class IntersectionManager : MonoBehaviour
     public float vehicleGreenTime = 15f;
     public float pedestrianGreenTime = 10f;
     public float yellowTime = 3f;
+
+    public event Action<LightState> OnTrafficLightChanged;
 
     void Start()
     {
@@ -76,6 +79,7 @@ public class IntersectionManager : MonoBehaviour
             SetVisualLights(vehicleVisualLights, LightState.Red);
             SetVisualLights(pedestrianVisualLights, LightState.Green);
             NotifyTTS(LightState.Green);
+            OnTrafficLightChanged?.Invoke(LightState.Green);
             yield return new WaitForSeconds(pedestrianGreenTime);
 
             // 4️⃣ 차량 빨강, 보행자 노랑
@@ -103,7 +107,7 @@ public class IntersectionManager : MonoBehaviour
                 bool green = (state == LightState.Green);
 
                 light.OnLightStateChanged(red, yellow, green);
-                Debug.Log($"🎯 [IntersectionManager] {light.name} CarControl → {state}");
+                //Debug.Log($"🎯 [IntersectionManager] {light.name} CarControl → {state}");
             }
         }
     }

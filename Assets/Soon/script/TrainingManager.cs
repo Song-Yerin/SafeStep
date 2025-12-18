@@ -2,6 +2,7 @@
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using System.Collections;
 
 public class TrainingManager : MonoBehaviour
 {
@@ -14,6 +15,7 @@ public class TrainingManager : MonoBehaviour
     public PathVisualizer pathVisualizer; // ⭐ 연결 필요!
     public StraightWalkDetector detector; // 센서
     public TextMeshProUGUI reportText;
+    public IntersectionManager trafficLightSystem;
 
     public Transform userHMD;             // 플레이어
     public Transform endPoint;            // 도착점
@@ -22,6 +24,11 @@ public class TrainingManager : MonoBehaviour
     [Header("오디오")]
     public AudioSource audioSource;
     public AudioClip guideVoiceClip;      // 종료 안내 음성
+    public AudioClip warningVoice;
+
+    [Header("오디오 - 결과 피드백")]
+    public AudioClip feedbackGood;   // 80점 이상 (예: "훌륭합니다!")
+    public AudioClip feedbackBad;    // 80점 미만 (예: "조금 더 연습이 필요해요.")
 
     [Header("설정")]
     public float arrivalDistance = 1.0f;  // 도착 인정 거리
@@ -38,6 +45,31 @@ public class TrainingManager : MonoBehaviour
         // 시작 시 결과창 숨기기
         if (resultUIPanel != null) resultUIPanel.SetActive(false);
         if (mapCamera != null) mapCamera.gameObject.SetActive(false);
+
+        if (trafficLightSystem != null)
+        {
+            trafficLightSystem.OnTrafficLightChanged += HandleTrafficLightChange;
+        }
+    }
+
+    void OnDestroy()
+    {
+        // (중요) 오브젝트가 사라질 때 구독 취소 (메모리 누수 방지)
+        if (trafficLightSystem != null)
+        {
+            trafficLightSystem.OnTrafficLightChanged -= HandleTrafficLightChange;
+        }
+    }
+
+    void HandleTrafficLightChange(LightState state)
+    {
+        // 1. 초록불인지 확인
+        // 2. 훈련이 '준비(Ready)' 상태인지 확인
+        if (state == LightState.Green && currentState == TrainingState.Ready)
+        {
+            Debug.Log("🚦 초록불 감지됨! 훈련을 시작합니다.");
+            TryStartTraining();
+        }
     }
 
     void Update()
@@ -63,10 +95,27 @@ public class TrainingManager : MonoBehaviour
         // 부정출발 감시 (안전선 넘었나?)
         if (IsOverLine())
         {
-            if (Time.time - lastLogTime > 1.0f)
+            if (Time.time - lastLogTime > 3.5f)
             {
                 Debug.Log("⛔ 위험! 훈련 전입니다. 뒤로 물러나세요! (Back)");
+                
+                audioSource.clip = warningVoice;
+                audioSource.Play();
+
                 lastLogTime = Time.time;
+            }
+        }
+    }
+
+    void PlayGuideVoice(AudioClip clip)
+    {
+        if (audioSource != null && clip != null)
+        {
+            // 이미 말하고 있으면 끊지 않고 기다릴지, 아니면 덮어쓸지 결정
+            // 여기서는 중요한 경고이므로 즉시 재생 (PlayOneShot)
+            if (!audioSource.isPlaying)
+            {
+                audioSource.PlayOneShot(clip);
             }
         }
     }
@@ -114,6 +163,7 @@ public class TrainingManager : MonoBehaviour
 
     void EndTraining()
     {
+        Debug.Log("훈련종료");
         currentState = TrainingState.Finished;
         detector.StopSensor(); // 센서 끄기
 
@@ -125,8 +175,41 @@ public class TrainingManager : MonoBehaviour
 
         // UI 및 오디오 활성화
         string finalReport = GenerateReportString(score);
+        PlayFeedbackAudio(score);
         ShowResultUI(finalReport);
 
+    }
+
+    void PlayFeedbackAudio(float score)
+    {
+        AudioClip scoreClip = null;
+
+        if (score >= 80) scoreClip = feedbackGood;
+        else scoreClip = feedbackBad;
+
+        // 코루틴 시작 (순서대로 재생)
+        StartCoroutine(PlayResultAudioSequence(scoreClip));
+    }
+
+    // ⭐ [중요] 오디오를 순서대로 재생하는 로직
+    IEnumerator PlayResultAudioSequence(AudioClip firstClip)
+    {
+        // 1. 점수별 멘트 재생 (예: "참 잘했어요")
+        if (firstClip != null)
+        {
+            audioSource.clip = firstClip;
+            audioSource.Play();
+
+            // 멘트가 다 끝날 때까지 대기 (클립 길이 + 0.5초 여유)
+            yield return new WaitForSeconds(firstClip.length + 0.5f);
+        }
+
+        // 2. 메뉴 안내 멘트 재생 (예: "다시 시작하시려면 왼쪽...")
+        if (guideVoiceClip != null)
+        {
+            audioSource.clip = guideVoiceClip;
+            audioSource.Play();
+        }
     }
 
     // 3. 리포트 문구 생성 (StringBuilder 사용으로 성능/가독성 향상)
@@ -137,9 +220,9 @@ public class TrainingManager : MonoBehaviour
             : "조금 더 직선 유지 연습이 필요합니다.";
 
         StringBuilder sb = new StringBuilder();
-        sb.AppendLine($"총 소요 시간    : {totalTime:F2}초");
+        sb.AppendLine($"총 소요 시간      : {totalTime:F2}초");
         sb.AppendLine($"직선 보행 유지율: {score:F1}%");
-        sb.AppendLine($"장애물 충돌     : {hitCount}회");
+        sb.AppendLine($"장애물 충돌       : {hitCount}회");
         sb.AppendLine($"{feedbackMsg}");
 
         return sb.ToString();
@@ -156,9 +239,7 @@ public class TrainingManager : MonoBehaviour
             if (mapCamera != null) mapCamera.gameObject.SetActive(true);
 
             // 텍스트 적용
-            if (reportText != null) reportText.text = message;
-
-            if (audioSource && guideVoiceClip) audioSource.PlayOneShot(guideVoiceClip);
+            if (reportText != null) reportText.text = message;   
         }
     }
     public bool IsOverLine()
@@ -221,7 +302,7 @@ public class TrainingManager : MonoBehaviour
     {
         if (currentState == TrainingState.Finished)
         {
-            SceneManager.LoadScene("TitleScene");
+            SceneManager.LoadScene("Title");
         }
     }
 }

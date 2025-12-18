@@ -13,6 +13,18 @@ public class TrainingInputHandler : MonoBehaviour
 
     private bool inputDelay = false; // 중복 입력 방지
 
+    private void OnEnable()
+    {
+        if (moveInputSource.action != null) moveInputSource.action.Enable();
+        if (startInputSource.action != null) startInputSource.action.Enable();
+    }
+
+    private void OnDisable()
+    {
+        if (moveInputSource.action != null) moveInputSource.action.Disable();
+        if (startInputSource.action != null) startInputSource.action.Disable();
+    }
+
     void Update()
     {
         // 1. 준비 상태일 때 -> 시작 입력 감시
@@ -27,7 +39,7 @@ public class TrainingInputHandler : MonoBehaviour
 
         // 2. 종료 상태일 때 -> 조이스틱 입력 감시
         else if (manager.currentState == TrainingManager.TrainingState.Finished)
-        {
+        {       
             HandleMenuInput();
         }
     }
