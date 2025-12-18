@@ -185,6 +185,7 @@ GameObject:
   - component: {fileID: 307562846}
   - component: {fileID: 307562845}
   - component: {fileID: 307562847}
+  - component: {fileID: 307562848}
   m_Layer: 0
   m_Name: TrainingManager
   m_TagString: Untagged
@@ -234,10 +235,52 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: faf96c4f933d9894f97818fe04648d33, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  currentState: 0
   detector: {fileID: 307562845}
   userHMD: {fileID: 1480951342}
-  endPoint: {fileID: 0}
+  endPoint: {fileID: 1392413940}
+  resultUIPanel: {fileID: 0}
+  audioSource: {fileID: 0}
+  guideVoiceClip: {fileID: 0}
   arrivalDistance: 1
+  safetyLineZ: -5
+--- !u!114 &307562848
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 307562844}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4ae025dca366a144f81a00f4f7d7e02a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  manager: {fileID: 307562847}
+  moveInputSource:
+    m_UseReference: 1
+    m_Action:
+      m_Name: Move Input Source
+      m_Type: 0
+      m_ExpectedControlType: 
+      m_Id: bd895904-604b-4c72-a8a3-852155ef8ac8
+      m_Processors: 
+      m_Interactions: 
+      m_SingletonActionBindings: []
+      m_Flags: 0
+    m_Reference: {fileID: -8198699208435500284, guid: c348712bda248c246b8c49b3db54643f, type: 3}
+  startInputSource:
+    m_UseReference: 1
+    m_Action:
+      m_Name: Start Input Source
+      m_Type: 0
+      m_ExpectedControlType: 
+      m_Id: d4e1496c-a2e2-44c0-bc21-ce85f84c17e3
+      m_Processors: 
+      m_Interactions: 
+      m_SingletonActionBindings: []
+      m_Flags: 0
+    m_Reference: {fileID: -2439264783773714294, guid: 0be0028c24f2a4c14a96b6aa39055933, type: 3}
 --- !u!114 &510003656 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 153982007679157697, guid: f6336ac4ac8b4d34bc5072418cdc62a0, type: 3}
@@ -495,7 +538,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1717954561962503726, guid: f6336ac4ac8b4d34bc5072418cdc62a0, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 1.6
+      value: 1.596
       objectReference: {fileID: 0}
     - target: {fileID: 1717954561962503726, guid: f6336ac4ac8b4d34bc5072418cdc62a0, type: 3}
       propertyPath: m_LocalRotation.w
@@ -1039,8 +1082,8 @@ Transform:
   m_GameObject: {fileID: 1983953501}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 5.28}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: 0, y: -0, z: 8.1395}
+  m_LocalScale: {x: 1, y: 1, z: 1.5719}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1410393115}
