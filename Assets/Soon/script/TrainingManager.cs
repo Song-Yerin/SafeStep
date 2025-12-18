@@ -155,7 +155,7 @@ public class TrainingManager : MonoBehaviour
         float finishLineZ = endPoint.position.z - arrivalDistance;
 
         // 현재 내 위치가 피니쉬 라인보다 커졌다면 (지나갔다면)
-        if (userHMD.position.z >= finishLineZ)
+        if (userHMD.position.z <= finishLineZ)
         {
             EndTraining();
         }
@@ -163,8 +163,7 @@ public class TrainingManager : MonoBehaviour
 
     void EndTraining()
     {
-        Debug.Log("훈련종료");
-        currentState = TrainingState.Finished;
+        Debug.Log("훈련종료");    
         detector.StopSensor(); // 센서 끄기
 
         if (pathVisualizer != null) pathVisualizer.StopDrawing();
@@ -210,6 +209,8 @@ public class TrainingManager : MonoBehaviour
             audioSource.clip = guideVoiceClip;
             audioSource.Play();
         }
+
+        currentState = TrainingState.Finished;
     }
 
     // 3. 리포트 문구 생성 (StringBuilder 사용으로 성능/가독성 향상)
@@ -249,7 +250,7 @@ public class TrainingManager : MonoBehaviour
 
         // "앞으로 가는 방향(Z가 커지는 방향)"이 훈련 방향이므로
         // 현재 위치가 설정한 17보다 커지면 넘은 것입니다.
-        return currentWorldZ > safetyLineZ;
+        return currentWorldZ < safetyLineZ;
     }
 
     // --- [중요] 외부(InputHandler/Obstacle)에서 호출할 함수들 ---
