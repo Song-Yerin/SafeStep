@@ -1,106 +1,127 @@
 ﻿using UnityEngine;
 using UnityEngine.Rendering;
-using UnityEngine.Rendering.Universal;  // 🔴 URP용
 
 public class VisionEffectManager : MonoBehaviour
 {
-    public Volume postProcessVolume;
-    public int currentVisionType = 0;
+    [Header("Volume")]
+    public Volume globalVolume;
 
-    private Vignette vignette;
-    private DepthOfField depthOfField;
-    private ColorAdjustments colorAdjustments;
-    private Bloom bloom;
+    [Header("Camera")]
+    public Camera mainCamera;
+
+    [Header("Vision Profiles")]
+    public VolumeProfile blindnessProfile;      // 0: Color + Bloom
+    public VolumeProfile lowVisionProfile;       // 1: Depth + Bloom
+    public VolumeProfile tunnelVisionProfile;    // 2: Depth + Vignette
+    public VolumeProfile peripheralVisionProfile; // 3: Depth
+
+    public int currentVisionType = 0;
 
     void Start()
     {
-        if (postProcessVolume == null)
-            postProcessVolume = FindObjectOfType<Volume>();
+        if (mainCamera == null)
+            mainCamera = Camera.main;
 
-        if (postProcessVolume != null && postProcessVolume.profile != null)
+        if (globalVolume == null)
+            globalVolume = FindObjectOfType<Volume>();
+
+        if (globalVolume != null)
         {
-            postProcessVolume.profile.TryGet(out vignette);
-            postProcessVolume.profile.TryGet(out depthOfField);
-            postProcessVolume.profile.TryGet(out colorAdjustments);
-            postProcessVolume.profile.TryGet(out bloom);
+            Debug.Log($"[VisionEffect] ✅ Volume 찾음!");
+        }
+        else
+        {
+            Debug.LogError("[VisionEffect] ❌ Global Volume 없음!");
         }
     }
 
     public void SetVisionEffect(int visionType)
     {
         currentVisionType = visionType;
-        ResetEffects();
 
+        Debug.Log($"==========================================");
+        Debug.Log($"[VisionEffect] 비전 타입 {visionType} 적용!");
+
+        if (globalVolume == null)
+        {
+            Debug.LogError("[VisionEffect] Global Volume이 없습니다!");
+            return;
+        }
+
+        // Profile 교체 + FOV 변경
         switch (visionType)
         {
-            case 0:
-                ApplyNormalVision();
+            case 0: // Blindness - Color + Bloom
+                ApplyBlindness();
                 break;
-            case 1:
+
+            case 1: // Low Vision - Depth + Bloom
                 ApplyLowVision();
                 break;
-            case 2:
+
+            case 2: // Tunnel Vision - Depth + Vignette
                 ApplyTunnelVision();
                 break;
-            case 3:
+
+            case 3: // Peripheral Vision - Depth
                 ApplyPeripheralVision();
                 break;
         }
 
-        Debug.Log($"[VisionEffect] {visionType} 적용됨");
+        Debug.Log($"[VisionEffect] Profile: {globalVolume.profile.name}");
+        Debug.Log($"[VisionEffect] FOV: {mainCamera.fieldOfView}");
+        Debug.Log($"==========================================");
     }
 
-    void ResetEffects()
+    void ApplyBlindness()
     {
-        if (vignette != null)
-            vignette.active = false;
-        if (depthOfField != null)
-            depthOfField.active = false;
-        if (bloom != null)
-            bloom.active = false;
-    }
+        if (blindnessProfile != null)
+        {
+            globalVolume.profile = blindnessProfile;
+        }
 
-    void ApplyNormalVision()
-    {
-        Debug.Log("[VisionEffect] 정상 시력");
+        if (mainCamera != null)
+            mainCamera.fieldOfView = 60f;
+
+        Debug.Log("[VisionEffect] ⚫ 완전 블라인드 (Color + Bloom)");
     }
 
     void ApplyLowVision()
     {
-        if (bloom != null)
+        if (lowVisionProfile != null)
         {
-            bloom.active = true;
-            bloom.intensity.value = 5f;
+            globalVolume.profile = lowVisionProfile;
         }
 
-        if (colorAdjustments != null)
-        {
-            colorAdjustments.saturation.value = -30f;
-        }
+        if (mainCamera != null)
+            mainCamera.fieldOfView = 55f;
 
-        Debug.Log("[VisionEffect] 저시력");
+        Debug.Log("[VisionEffect] 🔵 저시력 (Depth + Bloom)");
     }
 
     void ApplyTunnelVision()
     {
-        if (vignette != null)
+        if (tunnelVisionProfile != null)
         {
-            vignette.active = true;
-            vignette.intensity.value = 0.6f;
-            vignette.smoothness.value = 0.4f;
+            globalVolume.profile = tunnelVisionProfile;
         }
 
-        Debug.Log("[VisionEffect] 터널 시야");
+        if (mainCamera != null)
+            mainCamera.fieldOfView = 20f; // 매우 좁게
+
+        Debug.Log("[VisionEffect] 🔴 터널 시야 (Depth + Vignette + FOV 20)");
     }
 
     void ApplyPeripheralVision()
     {
-        if (depthOfField != null)
+        if (peripheralVisionProfile != null)
         {
-            depthOfField.active = true;
-            depthOfField.focusDistance.value = 100f;
+            globalVolume.profile = peripheralVisionProfile;
         }
 
-        Debug.Log("[VisionEffect] 주변 시야");
+        if (mainCamera != null)
+            mainCamera.fieldOfView = 100f; // 매우 넓게
+
+        Debug.Log("[VisionEffect] 🟡 주변 시야 (Depth + FOV 100)");
     }
 }
