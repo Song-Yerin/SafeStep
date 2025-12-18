@@ -181,10 +181,9 @@ public class TrainingManager : MonoBehaviour
 
     void PlayFeedbackAudio(float score)
     {
-        AudioClip scoreClip = null;
+        AudioClip scoreClip = feedbackGood;
 
-        if (score >= 80) scoreClip = feedbackGood;
-        else scoreClip = feedbackBad;
+        if (score <= 70) scoreClip = feedbackBad;
 
         // 코루틴 시작 (순서대로 재생)
         StartCoroutine(PlayResultAudioSequence(scoreClip));
