@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Tactile
   - Obstacle
+  - Ground
   layers:
   - Default
   - TransparentFX
