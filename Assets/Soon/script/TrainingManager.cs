@@ -3,6 +3,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using System.Collections;
+using UnityEngine.Rendering.Universal;
 
 public class TrainingManager : MonoBehaviour
 {
@@ -16,6 +17,7 @@ public class TrainingManager : MonoBehaviour
     public StraightWalkDetector detector; // 센서
     public TextMeshProUGUI reportText;
     public IntersectionManager trafficLightSystem;
+    public Camera mainCamera;
 
     public Transform userHMD;             // 플레이어
     public Transform endPoint;            // 도착점
@@ -42,6 +44,7 @@ public class TrainingManager : MonoBehaviour
 
     void Start()
     {
+        SetPostProcessing(true);
         // 시작 시 결과창 숨기기
         if (resultUIPanel != null) resultUIPanel.SetActive(false);
         if (mapCamera != null) mapCamera.gameObject.SetActive(false);
@@ -143,7 +146,19 @@ public class TrainingManager : MonoBehaviour
     }
 
     // --- 내부 기능 함수들 ---
+    void SetPostProcessing(bool isOn)
+    {
+        if (mainCamera == null) return;
 
+        // URP 카메라 데이터 가져오기
+        var cameraData = mainCamera.GetUniversalAdditionalCameraData();
+
+        if (cameraData != null)
+        {
+            // 카메라 설정의 'Post Processing' 체크박스를 제어
+            cameraData.renderPostProcessing = isOn;
+        }
+    }
     void CheckArrival()
     {
         // 높이 무시, 수평 거리만 계산
@@ -163,7 +178,7 @@ public class TrainingManager : MonoBehaviour
 
     void EndTraining()
     {
-        Debug.Log("훈련종료");    
+        SetPostProcessing(false);
         detector.StopSensor(); // 센서 끄기
 
         if (pathVisualizer != null) pathVisualizer.StopDrawing();
@@ -199,7 +214,7 @@ public class TrainingManager : MonoBehaviour
             audioSource.Play();
 
             // 멘트가 다 끝날 때까지 대기 (클립 길이 + 0.5초 여유)
-            yield return new WaitForSeconds(firstClip.length + 0.5f);
+            yield return new WaitForSeconds(firstClip.length + 3.5f);
         }
 
         // 2. 메뉴 안내 멘트 재생 (예: "다시 시작하시려면 왼쪽...")
